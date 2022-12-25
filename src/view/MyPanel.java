@@ -56,7 +56,7 @@ public class MyPanel extends JPanel implements ActionListener {
         }
         clip = AudioSystem.getClip();
         ais = AudioSystem.getAudioInputStream(file);
-
+        clip.open(ais);
 
     }
 
@@ -141,7 +141,6 @@ public class MyPanel extends JPanel implements ActionListener {
                 icon.setImage(icon.getImage().getScaledInstance(50, 50, 0));
                 onOff.setIcon(icon);
                 try {
-                    clip.open(ais);
                     clip.start();
                 } catch (Exception exc) {
                     exc.printStackTrace();
