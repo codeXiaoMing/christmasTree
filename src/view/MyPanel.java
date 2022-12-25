@@ -1,16 +1,16 @@
 package view;
 
-import java.applet.Applet;
-import java.applet.AudioClip;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.event.*;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-
-import javax.swing.*;
 
 public class MyPanel extends JPanel implements ActionListener {
 
@@ -21,6 +21,8 @@ public class MyPanel extends JPanel implements ActionListener {
     static final String ON = "src/resouce/ON.png";
     static final String OFF = "src/resouce/OFF.png";
 
+    static final String backImg = "src/resouce/backImg.jpg";
+
     int x, y;
     JButton onOff;
     Timer time;
@@ -29,9 +31,12 @@ public class MyPanel extends JPanel implements ActionListener {
     File file = new File(MUSIC);
     URL url = null;
     URI uri = null;
-    AudioClip clip = null;
+    //   since jdk9 : Clip (jdk9 before : AudioClip)
+    Clip clip = null;
+    AudioInputStream ais = null;
+    Image img = null;
 
-    MyPanel() {
+    MyPanel() throws Exception {
         setLayout(null);
         ImageIcon icon = new ImageIcon(OFF);
         icon.setImage(icon.getImage().getScaledInstance(50, 50, 0));
@@ -50,12 +55,22 @@ public class MyPanel extends JPanel implements ActionListener {
             uri = file.toURI();
             url = uri.toURL();
         } catch (MalformedURLException e1) {
-			System.out.println(e1);
+            System.out.println(e1);
         }
-        clip = Applet.newAudioClip(url);
+        clip = AudioSystem.getClip();
+        ais = AudioSystem.getAudioInputStream(file);
+        clip.open(ais);
+        img = new ImageIcon(new File(backImg).toURL()).getImage();
+
     }
 
     public void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        float alpha = 0.2f; // 透明度
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,
+                alpha));
+        g2.drawImage(img, 0, 0, this.getWidth(), this.getHeight(), this);
+
         x = 380;
         y = 100;
         if (color) {
@@ -135,8 +150,13 @@ public class MyPanel extends JPanel implements ActionListener {
                 ImageIcon icon = new ImageIcon(ON);
                 icon.setImage(icon.getImage().getScaledInstance(50, 50, 0));
                 onOff.setIcon(icon);
+                try {
+                    clip.start();
+                } catch (Exception exc) {
+                    exc.printStackTrace();
+                }
                 flag = false;
-                clip.loop();
+                clip.setLoopPoints(0, -1);
                 time.restart();
             } else {
                 ImageIcon icon = new ImageIcon(OFF);
