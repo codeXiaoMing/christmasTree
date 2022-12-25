@@ -21,6 +21,8 @@ public class MyPanel extends JPanel implements ActionListener {
     static final String ON = "src/resouce/ON.png";
     static final String OFF = "src/resouce/OFF.png";
 
+    static final String backImg = "src/resouce/backImg.jpg";
+
     int x, y;
     JButton onOff;
     Timer time;
@@ -32,6 +34,7 @@ public class MyPanel extends JPanel implements ActionListener {
     //   since jdk9 : Clip (jdk9 before : AudioClip)
     Clip clip = null;
     AudioInputStream ais = null;
+    Image img = null;
 
     MyPanel() throws Exception {
         setLayout(null);
@@ -57,10 +60,17 @@ public class MyPanel extends JPanel implements ActionListener {
         clip = AudioSystem.getClip();
         ais = AudioSystem.getAudioInputStream(file);
         clip.open(ais);
+        img = new ImageIcon(new File(backImg).toURL()).getImage();
 
     }
 
     public void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        float alpha = 0.2f; // 透明度
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,
+                alpha));
+        g2.drawImage(img, 0, 0, this.getWidth(), this.getHeight(), this);
+
         x = 380;
         y = 100;
         if (color) {
